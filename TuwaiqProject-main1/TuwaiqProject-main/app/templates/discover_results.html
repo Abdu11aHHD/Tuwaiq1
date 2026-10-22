@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}نتائج الاكتشاف{% endblock %}
+{% block content %}
+<section class="hero">
+  <h2>مرشحون لـ {{ company_a.official_name }}</h2>
+  <p class="muted">نوع التحليل: {{ analysis_labels.get(analysis_type) }} · تمت مقارنة الشركة بكل الشركات الأخرى المسجلة. الترتيب حسب الدرجة، وتُرتب الدرجات المتساوية بالرمز لضمان نتيجة ثابتة.</p>
+</section>
+<table>
+  <thead><tr><th>الترتيب</th><th>الشركة</th><th>الدرجة</th><th>سبب الترشيح ونقاط القوة</th><th>المخاطر والبيانات الناقصة</th><th>تغطية البيانات</th><th></th></tr></thead>
+  <tbody>
+  {% for rec, cand, payload in ranked %}
+    <tr>
+      <td>{{ rec.rank }}</td>
+      <td>{{ cand.official_name }} <span class="tag navy">{{ cand.symbol }}</span><br><small>{{ cand.sector }}</small></td>
+      <td><span class="score-badge {{ score_class(rec.overall_score) }}">{{ rec.overall_score }}</span></td>
+      <td>{{ rec.why }}</td>
+      <td>{{ rec.limitations }}</td>
+      <td>{{ (payload.evidence_coverage * 100)|round|int }}٪</td>
+      <td>
+        <form method="post" action="{{ url_for('main.compare') }}">
+          <input type="hidden" name="company_a" value="{{ company_a.id }}">
+          <input type="hidden" name="company_b" value="{{ cand.id }}">
+          <input type="hidden" name="analysis_type" value="{{ analysis_type }}">
+          <button class="btn secondary" type="submit">مقارنة تفصيلية</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
